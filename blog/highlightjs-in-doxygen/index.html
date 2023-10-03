@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<meta name="robots" content="index, follow">
+
+
+<title>Using doxygen with highlight.js</title>
+
+
+
+<meta name="title" content="Using doxygen with highlight.js">
+
+
+
+<link rel="stylesheet" href="https://cpcsl.github.io/css/style.css"/>
+
+
+
+</head>
+<body>
+  <header>
+    <nav class="navBar">
+  
+  
+  <a href="https://cpcsl.github.io">|home|</a>
+  
+  
+  
+  <a href="https://cpcsl.github.io/about">|about|</a>
+  
+  
+  
+  <a href="https://cpcsl.github.io/blog">|blog|</a>
+  
+  
+  
+  <a href="https://cpcsl.github.io/tags">|tags|</a>
+  
+  
+</nav>
+
+
+  </header>
+  <main>
+    
+<time datetime="2023-09-24">
+  Published on: <span class="meta">2023-09-24</span>
+  <br>
+</time>
+
+<p class="tags">
+
+  Tags: 
+  
+    <a href="/tags/doxygen">#doxygen</a>
+  
+    <a href="/tags/highlight-js">#highlight.js</a>
+  
+
+</p>
+
+<h1 class="title">
+  Using doxygen with highlight.js
+</h1>
+
+
+
+<p>This article discusses the use of <a href="https://highlightjs.org/">highlight.js</a> to extend the syntax highlighting capabilities of <a href="https://www.doxygen.nl/index.html">doxygen</a>. The implementation is inspired by two articles<sup class="footnote-reference"><a href="#1">1</a></sup><sup class="footnote-reference"><a href="#2">2</a></sup> and was developed using doxygen version 1.9.8.</p>
+<p>Doxygen currently supports the programming languages C, C++, Lex, C#, Objective-C, IDL, Java, PHP, Python, Fortran and D<sup class="footnote-reference"><a href="#3">3</a></sup>. Other languages can be included by using preprocessing scripts (e.g. for MATLAB source code<sup class="footnote-reference"><a href="#4">4</a></sup>), which convert the source code of the unsupported language into a pseudo C++ code. While this allows doxygen to interpret the source code and generate a documention, syntax highlighting in code blocks is displayed unproperly, since syntax highlighting is applied to the original, unprocessed code. For the following MATLAB function, the doxygen output can be seen <a href="https://cpcsl.github.io/blog/highlightjs-in-doxygen/doxy1/html/index.html">here</a>.</p>
+<pre data-lang="matlab" style="background-color:#2b303b;color:#c0c5ce;" class="language-matlab "><code class="language-matlab" data-lang="matlab"><span style="color:#b48ead;">function </span><span style="color:#8fa1b3;">hello</span><span>()
+</span><span> 
+</span><span>  </span><span style="color:#65737e;">% Hello world implementation
+</span><span>  </span><span style="color:#b48ead;">disp</span><span>(&#39;</span><span style="color:#a3be8c;">Hello, World!</span><span>&#39;);
+</span><span> 
+</span><span style="color:#b48ead;">end
+</span></code></pre>
+<p>One approach to extend doxygen's syntax highlighting capabilities is the use of the JavaScript library highlight.js. The syntax highlighting is then applied on page load, so it is independent of doxygen.</p>
+<h2 id="integration-of-highlight-js-in-a-doxygen-project">Integration of highlight.js in a doxygen project</h2>
+<p>A custom build of highlight.js can be downloaded from <a href="https://highlightjs.org/download">here</a>. It contains the actual library, <code>highlight.min.js</code>, and some syntax highlighting themes in the subdirectory <code>styles</code>.</p>
+<p>The integration of highlight.js in a doxygen project is done using a custom doxygen header, which can be created by running the doxygen command</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>doxygen -w html header.html footer.html customdoxygen.css
+</span></code></pre>
+<p>In the file <code>header.html</code>, the following snippet must be included at the end of the <code>&lt;head&gt;</code> block. The library is configured to highlight all code contained in <code>div</code> blocks of class <code>line</code> which are contained in a <code>div</code> block of class <code>fragment</code> (doxygen's convention).</p>
+<pre data-lang="html" style="background-color:#2b303b;color:#c0c5ce;" class="language-html "><code class="language-html" data-lang="html"><span>&lt;</span><span style="color:#bf616a;">script </span><span style="color:#d08770;">src</span><span>=&quot;</span><span style="color:#a3be8c;">$relpath^highlight.min.js</span><span>&quot;&gt;&lt;/</span><span style="color:#bf616a;">script</span><span>&gt;
+</span><span>&lt;</span><span style="color:#bf616a;">script</span><span>&gt;
+</span><span style="color:#bf616a;">$</span><span>(</span><span style="color:#b48ead;">function</span><span>() {
+</span><span>  </span><span style="color:#bf616a;">hljs</span><span>.</span><span style="color:#bf616a;">configure</span><span>({
+</span><span>    cssSelector: &quot;</span><span style="color:#a3be8c;">div.fragment div.line</span><span>&quot;,
+</span><span>    ignoreUnescapedHTML: </span><span style="color:#d08770;">true</span><span>,
+</span><span>  });
+</span><span>  </span><span style="color:#bf616a;">hljs</span><span>.</span><span style="color:#bf616a;">highlightAll</span><span>();
+</span><span>});
+</span><span>&lt;/</span><span style="color:#bf616a;">script</span><span>&gt;
+</span></code></pre>
+<p>The syntax highlighting theme is provided via css. It can be conveniently integrated into a custom doxygen css file <code>customdoxy.css</code> (which was already created by the command above). This allows the definition of changing syntax highlighting styles in light mode and dark mode. The following snippet shows a style definition which matches the colors of the MATLAB editor. The resulting doxygen page can be seen <a href="https://cpcsl.github.io/blog/highlightjs-in-doxygen/doxy2/html/index.html">here</a>.</p>
+<pre data-lang="css" style="background-color:#2b303b;color:#c0c5ce;" class="language-css "><code class="language-css" data-lang="css"><span style="color:#65737e;">/* [...] */
+</span><span>
+</span><span style="color:#bf616a;">html </span><span>{
+</span><span style="color:#65737e;">/* [...] */
+</span><span>--color-hljs-keyword: </span><span style="color:#96b5b4;">#0E00FF</span><span>;
+</span><span>--color-hljs-string: </span><span style="color:#96b5b4;">#AA04F9</span><span>;
+</span><span>--color-hljs-comment: </span><span style="color:#96b5b4;">#028009</span><span>;
+</span><span>}
+</span><span>
+</span><span style="color:#65737e;">/* [...] */
+</span><span>
+</span><span style="color:#65737e;">/* MATLAB syntax highlighting */
+</span><span style="color:#8fa1b3;">.</span><span style="color:#d08770;">hljs</span><span style="color:#8fa1b3;">.</span><span style="color:#d08770;">language-matlab </span><span style="color:#8fa1b3;">.</span><span style="color:#d08770;">hljs-comment </span><span>{
+</span><span>  color: </span><span style="color:#96b5b4;">var</span><span>(--color-hljs-comment)
+</span><span>}
+</span><span style="color:#8fa1b3;">.</span><span style="color:#d08770;">hljs</span><span style="color:#8fa1b3;">.</span><span style="color:#d08770;">language-matlab </span><span style="color:#8fa1b3;">.</span><span style="color:#d08770;">hljs-keyword </span><span>{
+</span><span>  color: </span><span style="color:#96b5b4;">var</span><span>(--color-hljs-keyword);
+</span><span>}
+</span><span style="color:#8fa1b3;">.</span><span style="color:#d08770;">hljs</span><span style="color:#8fa1b3;">.</span><span style="color:#d08770;">language-matlab </span><span style="color:#8fa1b3;">.</span><span style="color:#d08770;">hljs-string </span><span>{
+</span><span>  color: </span><span style="color:#96b5b4;">var</span><span>(--color-hljs-string)
+</span><span>}
+</span></code></pre>
+<p>Finally, the files must be included in the <code>Doxyfile</code>.</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>HTML_HEADER            = header.html
+</span><span>HTML_EXTRA_STYLESHEET  = customdoxygen.css
+</span><span>HTML_EXTRA_FILES       = highlight.min.js
+</span></code></pre>
+<h2 id="preservation-of-automatic-links">Preservation of automatic links</h2>
+<p>One issue of using the implementation of the last section is that all hyperlinks which doxygen sets within a code section get lost during the parsing through highlight.js. The following snippet shows an adaption of the implementation. Before the syntax highlighting is applied, all hyperlinks in the code lines are temporarily stored. After the syntax highlighting, they are re-inserted again. The final doxygen page is shown <a href="https://cpcsl.github.io/blog/highlightjs-in-doxygen/doxy3/html/index.html">here</a>.</p>
+<pre data-lang="html" style="background-color:#2b303b;color:#c0c5ce;" class="language-html "><code class="language-html" data-lang="html"><span>&lt;</span><span style="color:#bf616a;">script </span><span style="color:#d08770;">src</span><span>=&quot;</span><span style="color:#a3be8c;">$relpath^highlight.min.js</span><span>&quot;&gt;&lt;/</span><span style="color:#bf616a;">script</span><span>&gt;
+</span><span>&lt;</span><span style="color:#bf616a;">script</span><span>&gt;
+</span><span style="color:#bf616a;">$</span><span>(</span><span style="color:#b48ead;">function</span><span>() {
+</span><span>  </span><span style="color:#bf616a;">hljs</span><span>.</span><span style="color:#bf616a;">configure</span><span>({
+</span><span>    cssSelector: &quot;</span><span style="color:#a3be8c;">div.fragment div.line</span><span>&quot;,
+</span><span>    ignoreUnescapedHTML: </span><span style="color:#d08770;">true</span><span>,
+</span><span>  });
+</span><span>
+</span><span>  </span><span style="color:#65737e;">/* Loop through code lines */
+</span><span>  </span><span style="color:#b48ead;">const </span><span style="color:#bf616a;">autolinks </span><span>= [];
+</span><span>  </span><span style="color:#bf616a;">codelines </span><span>= document.</span><span style="color:#bf616a;">querySelectorAll</span><span>(&quot;</span><span style="color:#a3be8c;">div.fragment div.line</span><span>&quot;);
+</span><span>  </span><span style="color:#b48ead;">for </span><span>(</span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">i </span><span>= </span><span style="color:#d08770;">0</span><span>; </span><span style="color:#bf616a;">i </span><span>&lt; </span><span style="color:#bf616a;">codelines</span><span>.length; </span><span style="color:#bf616a;">i</span><span>++) {
+</span><span>    </span><span style="color:#bf616a;">autolinks</span><span>[</span><span style="color:#bf616a;">i</span><span>] = [];
+</span><span>
+</span><span>    </span><span style="color:#65737e;">/* get all links in current code line */
+</span><span>    </span><span style="color:#bf616a;">links </span><span>= </span><span style="color:#bf616a;">codelines</span><span>[</span><span style="color:#bf616a;">i</span><span>].</span><span style="color:#bf616a;">querySelectorAll</span><span>(&quot;</span><span style="color:#a3be8c;">a</span><span>&quot;);
+</span><span>    </span><span style="color:#b48ead;">if </span><span>(</span><span style="color:#bf616a;">links</span><span>.length == </span><span style="color:#d08770;">0</span><span>) {
+</span><span>      </span><span style="color:#b48ead;">continue</span><span>;
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#65737e;">/* filter out doubly defined link definitions */
+</span><span>    </span><span style="color:#bf616a;">autolinks</span><span>[</span><span style="color:#bf616a;">i</span><span>].</span><span style="color:#bf616a;">push</span><span>(</span><span style="color:#bf616a;">links</span><span>[</span><span style="color:#d08770;">0</span><span>]);
+</span><span>    </span><span style="color:#b48ead;">for </span><span>(</span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">k </span><span>= </span><span style="color:#d08770;">1</span><span>; </span><span style="color:#bf616a;">k </span><span>&lt; </span><span style="color:#bf616a;">links</span><span>.length; </span><span style="color:#bf616a;">k</span><span>++) {
+</span><span>      </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">outerHTMLnew </span><span>= </span><span style="color:#bf616a;">links</span><span>[</span><span style="color:#bf616a;">k</span><span>].outerHTML;
+</span><span>      </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">innerHTMLnew </span><span>= </span><span style="color:#bf616a;">links</span><span>[</span><span style="color:#bf616a;">k</span><span>].innerHTML;
+</span><span>      </span><span style="color:#b48ead;">for </span><span>(</span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">l </span><span>= </span><span style="color:#d08770;">1</span><span>; </span><span style="color:#bf616a;">l </span><span>&lt; </span><span style="color:#bf616a;">autolinks</span><span>[</span><span style="color:#bf616a;">i</span><span>].length; </span><span style="color:#bf616a;">l</span><span>++) {
+</span><span>        </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">outerHTMLcur </span><span>= </span><span style="color:#bf616a;">autolinks</span><span>[</span><span style="color:#bf616a;">i</span><span>][</span><span style="color:#bf616a;">k</span><span>].outerHTML;
+</span><span>        </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">innerHTMLcur </span><span>= </span><span style="color:#bf616a;">autolinks</span><span>[</span><span style="color:#bf616a;">i</span><span>][</span><span style="color:#bf616a;">k</span><span>].innerHTML;
+</span><span>        </span><span style="color:#b48ead;">if </span><span>(!</span><span style="color:#bf616a;">innerHTMLcur</span><span>.</span><span style="color:#bf616a;">localCompare</span><span>(</span><span style="color:#bf616a;">innerHTMLnew</span><span>) &amp;&amp; 
+</span><span>            !</span><span style="color:#bf616a;">outerHTMLcur</span><span>.</span><span style="color:#bf616a;">localCompare</span><span>(</span><span style="color:#bf616a;">outerHTMLnew</span><span>)) {
+</span><span>          </span><span style="color:#bf616a;">autolinks</span><span>[</span><span style="color:#bf616a;">i</span><span>].</span><span style="color:#bf616a;">push</span><span>(</span><span style="color:#bf616a;">links</span><span>[</span><span style="color:#bf616a;">k</span><span>]);
+</span><span>        }
+</span><span>      }
+</span><span>    }
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#65737e;">/* Highlight the code */
+</span><span>  </span><span style="color:#bf616a;">hljs</span><span>.</span><span style="color:#bf616a;">highlightAll</span><span>();
+</span><span> 
+</span><span>  </span><span style="color:#65737e;">/* Re-insert the links */
+</span><span>  </span><span style="color:#b48ead;">for </span><span>(</span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">i </span><span>= </span><span style="color:#d08770;">0</span><span>; </span><span style="color:#bf616a;">i </span><span>&lt; </span><span style="color:#bf616a;">codelines</span><span>.length; </span><span style="color:#bf616a;">i</span><span>++) {
+</span><span>    </span><span style="color:#b48ead;">for </span><span>(</span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">j </span><span>of </span><span style="color:#bf616a;">autolinks</span><span>[</span><span style="color:#bf616a;">i</span><span>]) {
+</span><span>      </span><span style="color:#bf616a;">codelines</span><span>[</span><span style="color:#bf616a;">i</span><span>].innerHTML = </span><span style="color:#bf616a;">codelines</span><span>[</span><span style="color:#bf616a;">i</span><span>].innerHTML.</span><span style="color:#bf616a;">replaceAll</span><span>(</span><span style="color:#bf616a;">j</span><span>.innerHTML, </span><span style="color:#bf616a;">j</span><span>.outerHTML);
+</span><span>    }
+</span><span>  }
+</span><span>
+</span><span>});
+</span><span>&lt;/</span><span style="color:#bf616a;">script</span><span>&gt;
+</span></code></pre>
+<hr />
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p><a href="https://coderwall.com/p/ydwz3a/use-highlight-js-for-syntax-highlighting-in-doxygen-generated-documentation">https://coderwall.com/p/ydwz3a/use-highlight-js-for-syntax-highlighting-in-doxygen-generated-documentation</a></p>
+</div>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<p><a href="https://github.com/martysama0134/doxygen-with-highlightjs">https://github.com/martysama0134/doxygen-with-highlightjs</a></p>
+</div>
+<div class="footnote-definition" id="3"><sup class="footnote-definition-label">3</sup>
+<p><a href="https://www.doxygen.nl/manual/starting.html">https://www.doxygen.nl/manual/starting.html</a></p>
+</div>
+<div class="footnote-definition" id="4"><sup class="footnote-definition-label">4</sup>
+<p><a href="https://de.mathworks.com/matlabcentral/fileexchange/25925-using-doxygen-with-matlab/">https://de.mathworks.com/matlabcentral/fileexchange/25925-using-doxygen-with-matlab/</a></p>
+</div>
+
+
+
+  </main>
+  <footer>
+    <hr>
+<div class="footContainer">
+  <p>
+    &copy 2023 cpcsl<br>
+    <a href="mailto:cpcsl@proton.me">cpcsl@proton.me</a>
+  </p>
+</div>
+
+
+  </footer>
+</body>
+
+</html>

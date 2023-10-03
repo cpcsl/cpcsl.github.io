@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>https://cpcsl.github.io/</loc>
+    </url>
+    <url>
+        <loc>https://cpcsl.github.io/about/</loc>
+    </url>
+    <url>
+        <loc>https://cpcsl.github.io/blog/</loc>
+    </url>
+    <url>
+        <loc>https://cpcsl.github.io/blog/highlightjs-in-doxygen/</loc>
+        <lastmod>2023-09-24</lastmod>
+    </url>
+    <url>
+        <loc>https://cpcsl.github.io/blog/page/1/</loc>
+    </url>
+    <url>
+        <loc>https://cpcsl.github.io/tags/</loc>
+    </url>
+    <url>
+        <loc>https://cpcsl.github.io/tags/doxygen/</loc>
+    </url>
+    <url>
+        <loc>https://cpcsl.github.io/tags/highlight-js/</loc>
+    </url>
+</urlset>
